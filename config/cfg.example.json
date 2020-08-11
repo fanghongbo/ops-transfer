@@ -1,0 +1,44 @@
+{
+  "debug": true,
+  "minStep": 30,
+  "log": {
+    "log_level": "INFO",
+    "log_path": "./logs",
+    "log_file_name": "run.log",
+    "log_keep_hours": 3
+  },
+  "judge": {
+    "enabled": true,
+    "batch": 200,
+    "conn_timeout": 1000,
+    "call_timeout": 5000,
+    "max_conn": 32,
+    "max_idle": 32,
+    "replicas": 500,
+    "cluster": {
+      "judge-00" : "127.0.0.1:6080"
+    }
+  },
+  "graph": {
+    "enabled": true,
+    "batch": 200,
+    "conn_timeout": 1000,
+    "call_timeout": 5000,
+    "max_conn": 32,
+    "max_idle": 32,
+    "replicas": 500,
+    "cluster": {
+      "graph-00" : "127.0.0.1:6070"
+    }
+  },
+  "http": {
+    "enabled": true,
+    "listen": ":6060"
+  },
+  "rpc": {
+    "enabled": true,
+    "listen": ":8433"
+  },
+  "max_cpu_rate": 0.2,
+  "max_mem_rate": 0.3
+}
