@@ -61,11 +61,23 @@ type GraphConfig struct {
 	Cluster     map[string]string `json:"cluster"`
 }
 
+type TsdbConfig struct {
+	Enabled     bool   `json:"enabled"`
+	Batch       int    `json:"batch"`
+	ConnTimeout int    `json:"conn_timeout"`
+	CallTimeout int    `json:"call_timeout"`
+	MaxConn     int    `json:"max_conn"`
+	MaxIdle     int    `json:"max_idle"`
+	Retry       int    `json:"retry"`
+	Addr        string `json:"addr"`
+}
+
 type GlobalConfig struct {
 	Debug      bool         `json:"debug"`
 	Log        *LogConfig   `json:"log"`
 	Judge      *JudgeConfig `json:"judge"`
 	Graph      *GraphConfig `json:"graph"`
+	Tsdb       *TsdbConfig  `json:"tsdb"`
 	Rpc        *RpcConfig   `json:"rpc"`
 	Http       *HttpConfig  `json:"http"`
 	MaxCPURate float64      `json:"max_cpu_rate"`
@@ -178,27 +190,29 @@ func ReloadConfig() error {
 
 func Validator() error {
 	// 设置默认日志路径为 ./logs
-	if config.Log.LogPath == "" {
-		config.Log.LogPath = "./logs"
-	}
+	if config.Log != nil {
+		if config.Log.LogPath == "" {
+			config.Log.LogPath = "./logs"
+		}
 
-	// 设置默认日志文件名称为 run.log
-	if config.Log.LogFileName == "" {
-		config.Log.LogFileName = "run.log"
-	}
+		// 设置默认日志文件名称为 run.log
+		if config.Log.LogFileName == "" {
+			config.Log.LogFileName = "run.log"
+		}
 
-	// 设置默认日志级别为 LogLevel
-	if config.Log.LogLevel == "" {
-		config.Log.LogLevel = "INFO"
-	}
+		// 设置默认日志级别为 LogLevel
+		if config.Log.LogLevel == "" {
+			config.Log.LogLevel = "INFO"
+		}
 
-	// 设置默认保留24小时的日志
-	if config.Log.LogKeepHours == 0 {
-		config.Log.LogKeepHours = 24
+		// 设置默认保留24小时的日志
+		if config.Log.LogKeepHours == 0 {
+			config.Log.LogKeepHours = 24
+		}
 	}
 
 	// judge 设置
-	if config.Judge.Enabled {
+	if config.Judge != nil && config.Judge.Enabled {
 		if config.Judge.Batch < 0 {
 			config.Judge.Batch = 200
 		}
@@ -229,7 +243,7 @@ func Validator() error {
 	}
 
 	// graph 设置
-	if config.Graph.Enabled {
+	if config.Graph != nil && config.Graph.Enabled {
 		if config.Graph.Batch < 0 {
 			config.Graph.Batch = 200
 		}
@@ -259,15 +273,46 @@ func Validator() error {
 		}
 	}
 
+	// tsdb 设置
+	if config.Tsdb != nil && config.Tsdb.Enabled {
+		if config.Tsdb.Batch < 0 {
+			config.Tsdb.Batch = 200
+		}
+
+		if config.Tsdb.MaxConn < 0 {
+			config.Tsdb.MaxConn = 32
+		}
+
+		if config.Tsdb.MaxIdle < 0 {
+			config.Tsdb.MaxIdle = 32
+		}
+
+		if config.Tsdb.CallTimeout < 0 {
+			config.Tsdb.CallTimeout = 5000
+		}
+
+		if config.Tsdb.ConnTimeout < 0 {
+			config.Tsdb.ConnTimeout = 1000
+		}
+
+		if config.Tsdb.Retry < 0 {
+			config.Tsdb.Retry = 3
+		}
+
+		if config.Tsdb.Addr == "" {
+			return errors.New("tsdb addr is empty")
+		}
+	}
+
 	// rpc 设置
-	if config.Rpc.Enabled {
+	if config.Rpc != nil && config.Rpc.Enabled {
 		if config.Rpc.Listen == "" {
 			return errors.New("rpc listen addr is empty")
 		}
 	}
 
 	// http 设置
-	if config.Http.Enabled {
+	if config.Http != nil && config.Http.Enabled {
 		if config.Http.Listen == "" {
 			return errors.New("http listen addr is empty")
 		}

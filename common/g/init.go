@@ -1,6 +1,9 @@
 package g
 
-import "context"
+import (
+	"context"
+	"github.com/fanghongbo/dlog"
+)
 
 func InitAll() {
 	InitConfig()
@@ -10,6 +13,8 @@ func InitAll() {
 
 func Shutdown(ctx context.Context) error {
 	defer ctx.Done()
+
+	dlog.Close()
 
 	return nil
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"github.com/fanghongbo/ops-transfer/common/g"
+	"github.com/fanghongbo/ops-transfer/http"
+	"github.com/fanghongbo/ops-transfer/rpc"
 	"log"
 	"os"
 	"os/signal"
@@ -12,7 +14,10 @@ import (
 func main() {
 	g.InitAll()
 
-	// 等待中断信号以优雅地关闭 Hbs（设置 5 秒的超时时间）
+	go rpc.Start()
+	go http.Start()
+
+	// 等待中断信号以优雅地关闭 transfer（设置 5 秒的超时时间）
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
