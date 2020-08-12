@@ -1,6 +1,9 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/fanghongbo/ops-transfer/utils"
+)
 
 type MetricValue struct {
 	Endpoint  string      `json:"endpoint"`
@@ -45,4 +48,8 @@ func (u *MetaData) String() string {
 		u.Value,
 		u.Tags,
 	)
+}
+
+func (u *MetaData) PK() string {
+	return utils.GetMetricPrimaryKey(u.Endpoint, u.Metric, u.Tags)
 }

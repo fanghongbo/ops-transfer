@@ -1,60 +1,21 @@
 package rpc
 
 import (
-	"fmt"
 	"github.com/fanghongbo/ops-transfer/common/g"
 	"github.com/fanghongbo/ops-transfer/common/model"
+	"github.com/fanghongbo/ops-transfer/common/proc"
+	"github.com/fanghongbo/ops-transfer/sender"
+	"github.com/fanghongbo/ops-transfer/utils"
 	"strconv"
-	"strings"
 	"time"
 )
-
-type TransferResp struct {
-	Msg        string
-	Total      int
-	ErrInvalid int
-	Latency    int64
-}
-
-func (t *TransferResp) String() string {
-	s := fmt.Sprintf("TransferResp total=%d, err_invalid=%d, latency=%dms",
-		t.Total, t.ErrInvalid, t.Latency)
-	if t.Msg != "" {
-		s = fmt.Sprintf("%s, msg=%s", s, t.Msg)
-	}
-	return s
-}
-
-func ReformatTag(str string) map[string]string {
-	var (
-		tagMap map[string]string
-		tags   []string
-	)
-
-	if str == "" {
-		return map[string]string{}
-	}
-
-	if strings.ContainsRune(str, ' ') {
-		str = strings.Replace(str, " ", "", -1)
-	}
-
-	tagMap = make(map[string]string)
-
-	tags = strings.Split(str, ",")
-	for _, tag := range tags {
-		idx := strings.IndexRune(tag, '=')
-		if idx != -1 {
-			tagMap[tag[:idx]] = tag[idx+1:]
-		}
-	}
-	return tagMap
-}
 
 func RecvMetricValues(args []*model.MetricValue, reply *model.TransferResponse, source string) error {
 	var (
 		start time.Time
 		items []*model.MetaData
+		cfg   *g.GlobalConfig
+		cnt   int64
 	)
 
 	start = time.Now()
@@ -114,7 +75,7 @@ func RecvMetricValues(args []*model.MetricValue, reply *model.TransferResponse, 
 			Timestamp:   val.Timestamp,
 			Step:        val.Step,
 			CounterType: val.Type,
-			Tags:        ReformatTag(val.Tags),
+			Tags:        utils.ReformatTag(val.Tags),
 		}
 
 		// metric value 类型转换
@@ -142,19 +103,32 @@ func RecvMetricValues(args []*model.MetricValue, reply *model.TransferResponse, 
 		items = append(items, newMetric)
 	}
 
-	//cfg := g.Config()
-	//
-	//if cfg.Graph.Enabled {
-	//	sender.Push2GraphSendQueue(items)
-	//}
-	//
-	//if cfg.Judge.Enabled {
-	//	sender.Push2JudgeSendQueue(items)
-	//}
-	//
-	//if cfg.Tsdb.Enabled {
-	//	sender.Push2TsdbSendQueue(items)
-	//}
+	// statistics
+	cnt = int64(len(items))
+	proc.RecvCnt.IncrBy(cnt)
+
+	if source == "rpc" {
+		proc.RpcRecvCnt.IncrBy(cnt)
+	}
+
+	if source == "http" {
+		proc.HttpRecvCnt.IncrBy(cnt)
+	}
+
+	cfg = g.Conf()
+
+	// 推送到对应的队列中
+	if cfg.Graph != nil && cfg.Graph.Enabled {
+		sender.Push2GraphSendQueue(items)
+	}
+
+	if cfg.Judge != nil && cfg.Judge.Enabled {
+		sender.Push2JudgeSendQueue(items)
+	}
+
+	if cfg.TsDB != nil && cfg.TsDB.Enabled {
+		sender.Push2TsDBSendQueue(items)
+	}
 
 	reply.Message = "ok"
 	reply.Total = len(args)

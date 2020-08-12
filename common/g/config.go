@@ -61,7 +61,7 @@ type GraphConfig struct {
 	Cluster     map[string]string `json:"cluster"`
 }
 
-type TsdbConfig struct {
+type TsDBConfig struct {
 	Enabled     bool   `json:"enabled"`
 	Batch       int    `json:"batch"`
 	ConnTimeout int    `json:"conn_timeout"`
@@ -74,10 +74,11 @@ type TsdbConfig struct {
 
 type GlobalConfig struct {
 	Debug      bool         `json:"debug"`
+	MinStep    int          `json:"min_step"`
 	Log        *LogConfig   `json:"log"`
 	Judge      *JudgeConfig `json:"judge"`
 	Graph      *GraphConfig `json:"graph"`
-	Tsdb       *TsdbConfig  `json:"tsdb"`
+	TsDB       *TsDBConfig  `json:"tsdb"`
 	Rpc        *RpcConfig   `json:"rpc"`
 	Http       *HttpConfig  `json:"http"`
 	MaxCPURate float64      `json:"max_cpu_rate"`
@@ -149,6 +150,9 @@ func InitConfig() {
 	dlog.Infof("bind [%d] cpu core", maxCPUNum)
 	runtime.GOMAXPROCS(maxCPUNum)
 
+	//初始化集群节点
+	InitClusterNode()
+
 	dlog.Infof("memory limit: %d MB", maxMemMB)
 }
 
@@ -185,10 +189,18 @@ func ReloadConfig() error {
 		return err
 	}
 
+	// 初始化集群节点
+	InitClusterNode()
+
 	return nil
 }
 
 func Validator() error {
+	// 允许上报的数据最小间隔，默认为30秒
+	if config.MinStep < 1 {
+		config.MinStep = 30
+	}
+
 	// 设置默认日志路径为 ./logs
 	if config.Log != nil {
 		if config.Log.LogPath == "" {
@@ -273,33 +285,33 @@ func Validator() error {
 		}
 	}
 
-	// tsdb 设置
-	if config.Tsdb != nil && config.Tsdb.Enabled {
-		if config.Tsdb.Batch < 0 {
-			config.Tsdb.Batch = 200
+	// ts db 设置
+	if config.TsDB != nil && config.TsDB.Enabled {
+		if config.TsDB.Batch < 0 {
+			config.TsDB.Batch = 200
 		}
 
-		if config.Tsdb.MaxConn < 0 {
-			config.Tsdb.MaxConn = 32
+		if config.TsDB.MaxConn < 0 {
+			config.TsDB.MaxConn = 32
 		}
 
-		if config.Tsdb.MaxIdle < 0 {
-			config.Tsdb.MaxIdle = 32
+		if config.TsDB.MaxIdle < 0 {
+			config.TsDB.MaxIdle = 32
 		}
 
-		if config.Tsdb.CallTimeout < 0 {
-			config.Tsdb.CallTimeout = 5000
+		if config.TsDB.CallTimeout < 0 {
+			config.TsDB.CallTimeout = 5000
 		}
 
-		if config.Tsdb.ConnTimeout < 0 {
-			config.Tsdb.ConnTimeout = 1000
+		if config.TsDB.ConnTimeout < 0 {
+			config.TsDB.ConnTimeout = 1000
 		}
 
-		if config.Tsdb.Retry < 0 {
-			config.Tsdb.Retry = 3
+		if config.TsDB.Retry < 0 {
+			config.TsDB.Retry = 3
 		}
 
-		if config.Tsdb.Addr == "" {
+		if config.TsDB.Addr == "" {
 			return errors.New("tsdb addr is empty")
 		}
 	}

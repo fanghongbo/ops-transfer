@@ -1,6 +1,6 @@
 {
   "debug": true,
-  "minStep": 30,
+  "min_step": 30,
   "log": {
     "log_level": "INFO",
     "log_path": "./logs",
@@ -16,7 +16,7 @@
     "max_idle": 32,
     "replicas": 500,
     "cluster": {
-      "judge-00" : "127.0.0.1:6080"
+      "judge-00": "127.0.0.1:6080"
     }
   },
   "graph": {
@@ -28,7 +28,7 @@
     "max_idle": 32,
     "replicas": 500,
     "cluster": {
-      "graph-00" : "127.0.0.1:6070"
+      "graph-00": "127.0.0.1:6070"
     }
   },
   "tsdb": {

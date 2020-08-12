@@ -5,6 +5,7 @@ import (
 	"github.com/fanghongbo/ops-transfer/common/g"
 	"github.com/fanghongbo/ops-transfer/http"
 	"github.com/fanghongbo/ops-transfer/rpc"
+	"github.com/fanghongbo/ops-transfer/sender"
 	"log"
 	"os"
 	"os/signal"
@@ -14,6 +15,7 @@ import (
 func main() {
 	g.InitAll()
 
+	go sender.Start()
 	go rpc.Start()
 	go http.Start()
 

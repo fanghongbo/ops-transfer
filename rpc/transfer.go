@@ -6,7 +6,7 @@ import (
 
 type Transfer int
 
-func (u *Transfer) Ping(req model.NullRpcRequest, resp *model.SimpleRpcResponse) error {
+func (u *Transfer) Ping(req model.NullRpcRequest, resp *model.RpcResponse) error {
 	return nil
 }
 

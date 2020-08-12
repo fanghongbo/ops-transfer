@@ -14,6 +14,7 @@ func InitAll() {
 func Shutdown(ctx context.Context) error {
 	defer ctx.Done()
 
+	// 刷新日志缓存
 	dlog.Close()
 
 	return nil

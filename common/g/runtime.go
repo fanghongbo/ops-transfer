@@ -37,13 +37,13 @@ func MemMonitor() {
 			rate = (nowMemUsedMB * 100) / maxMemMB
 
 			if config.Debug {
-				dlog.Infof("agent mem used: %dMB, percent: %d%%", nowMemUsedMB, rate)
+				dlog.Infof("transfer mem used: %dMB, percent: %d%%", nowMemUsedMB, rate)
 			}
 
 			// 若超50%限制，打印 warning
 			// 超过100%，就退出了
 			if rate > 50 {
-				dlog.Warningf("agent heap memory used rate, current: %d%%", rate)
+				dlog.Warningf("transfer heap memory used rate, current: %d%%", rate)
 			}
 			if rate > 100 {
 				// 堆内存已超过限制，退出进程
