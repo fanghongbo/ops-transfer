@@ -23,7 +23,7 @@ Refer to `cfg.example.json`, modify the file name to `cfg.json` :
 ```config
 {
   "debug": true,
-  "minStep": 30,
+  "min_step": 30,
   "log": {
     "log_level": "INFO",
     "log_path": "./logs",
@@ -39,7 +39,7 @@ Refer to `cfg.example.json`, modify the file name to `cfg.json` :
     "max_idle": 32,
     "replicas": 500,
     "cluster": {
-      "judge-00" : "127.0.0.1:6080"
+      "judge-00": "127.0.0.1:6080"
     }
   },
   "graph": {
@@ -51,8 +51,18 @@ Refer to `cfg.example.json`, modify the file name to `cfg.json` :
     "max_idle": 32,
     "replicas": 500,
     "cluster": {
-      "graph-00" : "127.0.0.1:6070"
+      "graph-00": "127.0.0.1:6070"
     }
+  },
+  "tsdb": {
+    "enabled": false,
+    "batch": 200,
+    "conn_timeout": 1000,
+    "call_timeout": 5000,
+    "max_conn": 32,
+    "max_idle": 32,
+    "retry": 3,
+    "address": "127.0.0.1:8088"
   },
   "http": {
     "enabled": true,
